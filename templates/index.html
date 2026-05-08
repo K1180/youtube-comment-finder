@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>YouTube Comment Finder</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
-  <!-- 560行までCSS -->
 <style>
   :root {
     --bg: #0a0a0f;
@@ -211,6 +210,21 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
+  }
+
+  .date-selects {
+    display: grid;
+    grid-template-columns: 90px 1fr 1fr;
+    gap: 6px;
+  }
+
+  .date-year-input {
+    -moz-appearance: textfield;
+  }
+  .date-year-input::-webkit-outer-spin-button,
+  .date-year-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
 
   .btn-search {
@@ -637,12 +651,20 @@
 
       <div class="form-group">
         <label>開始日（From）</label>
-        <input type="date" id="dateFrom">
+        <div class="date-selects">
+          <input type="number" id="dateFromYear" placeholder="例: 2024" min="2005" max="2099" class="date-year-input">
+          <select id="dateFromMonth"><option value="">月</option></select>
+          <select id="dateFromDay"><option value="">日</option></select>
+        </div>
       </div>
 
       <div class="form-group">
         <label>終了日（To）</label>
-        <input type="date" id="dateTo">
+        <div class="date-selects">
+          <input type="number" id="dateToYear" placeholder="例: 2024" min="2005" max="2099" class="date-year-input">
+          <select id="dateToMonth"><option value="">月</option></select>
+          <select id="dateToDay"><option value="">日</option></select>
+        </div>
       </div>
 
       <div class="form-group full">
@@ -709,6 +731,43 @@
 </div>
 
 <script>
+  // --- 月・日プルダウンの生成 ---
+  function buildMonthOptions(selectId) {
+    const sel = document.getElementById(selectId);
+    for (let m = 1; m <= 12; m++) {
+      const o = document.createElement('option');
+      o.value = String(m).padStart(2, '0');
+      o.textContent = m + '月';
+      sel.appendChild(o);
+    }
+  }
+
+  function buildDayOptions(selectId) {
+    const sel = document.getElementById(selectId);
+    for (let d = 1; d <= 31; d++) {
+      const o = document.createElement('option');
+      o.value = String(d).padStart(2, '0');
+      o.textContent = d + '日';
+      sel.appendChild(o);
+    }
+  }
+
+  buildMonthOptions('dateFromMonth');
+  buildDayOptions('dateFromDay');
+  buildMonthOptions('dateToMonth');
+  buildDayOptions('dateToDay');
+
+  // 年・月・日 → "YYYY-MM-DD" or "" に変換
+  function buildDateString(yearId, monthId, dayId) {
+    const y = document.getElementById(yearId).value.trim();
+    const m = document.getElementById(monthId).value;
+    const d = document.getElementById(dayId).value;
+    if (!y) return '';
+    const mm = m || '01';
+    const dd = d || '01';
+    return `${y}-${mm}-${dd}`;
+  }
+
   function toggleApiKey() {
     const input = document.getElementById('apiKey');
     const btn = document.getElementById('eyeBtn');
@@ -791,8 +850,8 @@
     const apiKey = document.getElementById('apiKey').value.trim();
     const channelUrl = document.getElementById('channelUrl').value.trim();
     const keyword = document.getElementById('keyword').value.trim();
-    const dateFrom = document.getElementById('dateFrom').value;
-    const dateTo = document.getElementById('dateTo').value;
+    const dateFrom = buildDateString('dateFromYear', 'dateFromMonth', 'dateFromDay');
+    const dateTo   = buildDateString('dateToYear',   'dateToMonth',   'dateToDay');
     const maxVideos = document.getElementById('maxVideos').value;
 
     // Validation
