@@ -1,7 +1,14 @@
 {
   "version": 2,
   "routes": [
-    { "src": "/search", "dest": "/api/search.py" },
-    { "src": "/(.*)",   "dest": "/index.html"    }
+    {
+      "src": "/search",
+      "dest": "/api/search.py",
+      "methods": ["POST", "OPTIONS"]
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
   ]
 }
