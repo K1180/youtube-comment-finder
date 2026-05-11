@@ -1,6 +1,7 @@
 {
   "version": 2,
-  "rewrites": [
-    { "source": "/search", "destination": "/api/search" }
+  "routes": [
+    { "src": "/search", "dest": "/api/search" },
+    { "src": "/(.*)",   "dest": "/index.html"  }
   ]
 }

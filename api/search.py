@@ -1,3 +1,4 @@
+from http.server import BaseHTTPRequestHandler
 from googleapiclient.discovery import build
 from datetime import datetime, timezone
 import json
@@ -7,7 +8,6 @@ import os
 
 def extract_channel_id(api_key, url_or_id):
     youtube = build('youtube', 'v3', developerKey=api_key)
-
     handle_match     = re.search(r'@([\w\-\.]+)', url_or_id)
     channel_id_match = re.search(r'channel/(UC[\w\-]+)', url_or_id)
     custom_match     = re.search(r'(?:/c/|/user/)([\w\-\.]+)', url_or_id)
@@ -39,14 +39,9 @@ def extract_channel_id(api_key, url_or_id):
 def get_live_videos_from_channel(youtube, channel_id, published_after=None, published_before=None, max_videos=50):
     videos = []
     next_page_token = None
-
     params = dict(
-        part='snippet',
-        channelId=channel_id,
-        type='video',
-        eventType='completed',
-        maxResults=50,
-        order='date'
+        part='snippet', channelId=channel_id, type='video',
+        eventType='completed', maxResults=50, order='date'
     )
     if published_after:
         params['publishedAfter'] = published_after
@@ -68,7 +63,6 @@ def get_live_videos_from_channel(youtube, channel_id, published_after=None, publ
         next_page_token = res.get('nextPageToken')
         if not next_page_token or len(videos) >= max_videos:
             break
-
     return videos[:max_videos]
 
 
@@ -76,11 +70,8 @@ def search_comments_in_video(youtube, video_id, keyword):
     matched_comments = []
     try:
         res = youtube.commentThreads().list(
-            part='snippet',
-            videoId=video_id,
-            maxResults=100,
-            order='relevance',
-            textFormat='plainText'
+            part='snippet', videoId=video_id,
+            maxResults=100, order='relevance', textFormat='plainText'
         ).execute()
         for item in res.get('items', []):
             top  = item['snippet']['topLevelComment']['snippet']
@@ -97,84 +88,89 @@ def search_comments_in_video(youtube, video_id, keyword):
     return matched_comments
 
 
-def handler(request):
-    if request.method == 'OPTIONS':
-        return Response('', 200, {
-            'Access-Control-Allow-Origin':  '*',
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
-        })
+class handler(BaseHTTPRequestHandler):
 
-    if request.method != 'POST':
-        return json_response({'error': 'Method not allowed'}, 405)
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self._cors_headers()
+        self.end_headers()
 
-    api_key = os.environ.get('YOUTUBE_API_KEY', '')
-    if not api_key:
-        return json_response({'error': 'サーバーにAPIキーが設定されていません。'}, 500)
+    def do_GET(self):
+        self._json_response(200, {'status': 'ok'})
 
-    try:
-        data = request.json
-    except Exception:
-        return json_response({'error': 'リクエストの形式が不正です。'}, 400)
+    def do_POST(self):
+        api_key = os.environ.get('YOUTUBE_API_KEY', '')
+        if not api_key:
+            self._json_response(500, {'error': 'サーバーにAPIキーが設定されていません。'})
+            return
 
-    channel_input = (data.get('channel_url') or '').strip()
-    keyword       = (data.get('keyword')     or '').strip()
-    date_from     = (data.get('date_from')   or '').strip()
-    date_to       = (data.get('date_to')     or '').strip()
-    max_videos    = int(data.get('max_videos', 20))
+        length = int(self.headers.get('Content-Length', 0))
+        body   = self.rfile.read(length)
+        try:
+            data = json.loads(body)
+        except Exception:
+            self._json_response(400, {'error': 'リクエストの形式が不正です。'})
+            return
 
-    if not channel_input or not keyword:
-        return json_response({'error': 'チャンネルURLとキーワードは必須です。'}, 400)
+        channel_input = (data.get('channel_url') or '').strip()
+        keyword       = (data.get('keyword')     or '').strip()
+        date_from     = (data.get('date_from')   or '').strip()
+        date_to       = (data.get('date_to')     or '').strip()
+        max_videos    = int(data.get('max_videos', 20))
 
-    try:
-        youtube    = build('youtube', 'v3', developerKey=api_key)
-        channel_id = extract_channel_id(api_key, channel_input)
-        if not channel_id:
-            return json_response({'error': 'チャンネルが見つかりませんでした。'}, 404)
+        if not channel_input or not keyword:
+            self._json_response(400, {'error': 'チャンネルURLとキーワードは必須です。'})
+            return
 
-        published_after  = None
-        published_before = None
-        if date_from:
-            published_after = datetime.strptime(date_from, '%Y-%m-%d').replace(tzinfo=timezone.utc).isoformat()
-        if date_to:
-            dt = datetime.strptime(date_to, '%Y-%m-%d').replace(hour=23, minute=59, second=59, tzinfo=timezone.utc)
-            published_before = dt.isoformat()
+        try:
+            youtube    = build('youtube', 'v3', developerKey=api_key)
+            channel_id = extract_channel_id(api_key, channel_input)
+            if not channel_id:
+                self._json_response(404, {'error': 'チャンネルが見つかりませんでした。'})
+                return
 
-        videos      = get_live_videos_from_channel(youtube, channel_id, published_after, published_before, max_videos)
-        matched     = []
-        not_matched = []
+            published_after  = None
+            published_before = None
+            if date_from:
+                published_after = datetime.strptime(date_from, '%Y-%m-%d').replace(tzinfo=timezone.utc).isoformat()
+            if date_to:
+                dt = datetime.strptime(date_to, '%Y-%m-%d').replace(
+                    hour=23, minute=59, second=59, tzinfo=timezone.utc)
+                published_before = dt.isoformat()
 
-        for v in videos:
-            comments = search_comments_in_video(youtube, v['video_id'], keyword)
-            if comments:
-                v['matched_comments'] = comments
-                v['match_count']      = len(comments)
-                matched.append(v)
-            else:
-                not_matched.append(v)
+            videos      = get_live_videos_from_channel(youtube, channel_id, published_after, published_before, max_videos)
+            matched     = []
+            not_matched = []
 
-        return json_response({
-            'matched':      matched,
-            'not_matched':  not_matched,
-            'total_videos': len(videos),
-            'keyword':      keyword,
-        }, 200)
+            for v in videos:
+                comments = search_comments_in_video(youtube, v['video_id'], keyword)
+                if comments:
+                    v['matched_comments'] = comments
+                    v['match_count']      = len(comments)
+                    matched.append(v)
+                else:
+                    not_matched.append(v)
 
-    except Exception as e:
-        return json_response({'error': f'エラーが発生しました: {str(e)}'}, 500)
+            self._json_response(200, {
+                'matched':      matched,
+                'not_matched':  not_matched,
+                'total_videos': len(videos),
+                'keyword':      keyword,
+            })
 
+        except Exception as e:
+            self._json_response(500, {'error': f'エラーが発生しました: {str(e)}'})
 
-def json_response(payload, status=200):
-    body = json.dumps(payload, ensure_ascii=False)
-    return Response(body, status, {
-        'Content-Type':                'application/json; charset=utf-8',
-        'Access-Control-Allow-Origin': '*',
-    })
+    def _cors_headers(self):
+        self.send_header('Access-Control-Allow-Origin',  '*')
+        self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
 
-
-class Response:
-    def __init__(self, body, status=200, headers=None):
-        self.body        = body
-        self.status      = status
-        self.status_code = status
-        self.headers     = headers or {}
+    def _json_response(self, status, payload):
+        body = json.dumps(payload, ensure_ascii=False).encode('utf-8')
+        self.send_response(status)
+        self._cors_headers()
+        self.send_header('Content-Type',   'application/json; charset=utf-8')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)

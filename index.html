@@ -729,7 +729,7 @@
     try {
       document.getElementById('loadingMsg').textContent = '動画を取得中... しばらくお待ちください';
 
-      const res = await fetch('/api/search', {
+      const res = await fetch('/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ channel_url: channelUrl, keyword, date_from: dateFrom, date_to: dateTo, max_videos: maxVideos })
