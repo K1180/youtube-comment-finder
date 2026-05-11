@@ -166,33 +166,6 @@
 
   select option { background: var(--surface2); }
 
-  .api-key-wrapper {
-    position: relative;
-  }
-
-  .api-key-wrapper input {
-    padding-right: 48px;
-    font-family: var(--mono);
-    font-size: 13px;
-  }
-
-  .toggle-eye {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 16px;
-    padding: 0;
-    line-height: 1;
-    transition: color 0.2s;
-  }
-
-  .toggle-eye:hover { color: var(--text); }
-
   .hint {
     font-size: 11px;
     color: var(--muted);
@@ -504,67 +477,6 @@
     margin-top: 6px;
   }
 
-  /* API guide */
-  .api-guide {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px 32px;
-    margin-bottom: 24px;
-  }
-
-  .steps {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 16px;
-  }
-
-  .step {
-    display: flex;
-    gap: 14px;
-    align-items: flex-start;
-  }
-
-  .step-num {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--accent2);
-    color: white;
-    font-size: 11px;
-    font-weight: 700;
-    font-family: var(--mono);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-
-  .step-text {
-    font-size: 13px;
-    line-height: 1.6;
-    color: var(--text);
-  }
-
-  .step-text a {
-    color: var(--accent2);
-    text-decoration: none;
-  }
-
-  .step-text a:hover { text-decoration: underline; }
-
-  code {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 1px 6px;
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--warning);
-  }
-
   /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: var(--surface); }
@@ -588,57 +500,10 @@
     </h1>
   </header>
 
-  <!-- API Key Guide -->
-  <details class="api-guide">
-    <summary style="cursor:pointer; font-family: var(--mono); font-size:13px; font-weight:700; color:var(--accent2);">
-      📋 YouTube Data API キーの取得方法（クリックで展開）
-    </summary>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-text">
-          <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a> にアクセスし、Googleアカウントでログイン
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-text">新しいプロジェクトを作成（または既存のものを選択）</div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-text">
-          左メニュー → <strong>「APIとサービス」→「ライブラリ」</strong> で <code>YouTube Data API v3</code> を検索して有効化
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">4</div>
-        <div class="step-text">
-          <strong>「認証情報」→「認証情報を作成」→「APIキー」</strong> でキーを生成
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">5</div>
-        <div class="step-text">
-          生成されたキーをコピーして下のフォームに貼り付けてください。
-          無料枠：<strong>1日10,000ユニット</strong><br>
-          本ツールの消費目安：ライブ配信リスト取得（100件あたり約100ユニット）+ コメント検索（1配信あたり<strong>1ユニット</strong>）
-        </div>
-      </div>
-    </div>
-  </details>
-
   <!-- Search Form -->
   <div class="card">
     <div class="card-title">検索条件</div>
     <div class="form-grid">
-      <div class="form-group full">
-        <label>YouTube API キー</label>
-        <div class="api-key-wrapper">
-          <input type="password" id="apiKey" placeholder="AIzaSy..." autocomplete="off">
-          <button class="toggle-eye" onclick="toggleApiKey()" id="eyeBtn">👁</button>
-        </div>
-      </div>
-
       <div class="form-group full">
         <label>チャンネル URL</label>
         <input type="text" id="channelUrl" placeholder="https://www.youtube.com/@channelname または https://www.youtube.com/channel/UC...">
@@ -769,18 +634,6 @@
     return `${y}-${mm}-${dd}`;
   }
 
-  function toggleApiKey() {
-    const input = document.getElementById('apiKey');
-    const btn = document.getElementById('eyeBtn');
-    if (input.type === 'password') {
-      input.type = 'text';
-      btn.textContent = '🙈';
-    } else {
-      input.type = 'password';
-      btn.textContent = '👁';
-    }
-  }
-
   function toggleNotMatched() {
     const list = document.getElementById('notMatchedList');
     const btn = document.getElementById('notMatchedToggle');
@@ -848,7 +701,6 @@
   }
 
   async function startSearch() {
-    const apiKey = document.getElementById('apiKey').value.trim();
     const channelUrl = document.getElementById('channelUrl').value.trim();
     const keyword = document.getElementById('keyword').value.trim();
     const dateFrom = buildDateString('dateFromYear', 'dateFromMonth', 'dateFromDay');
@@ -859,8 +711,8 @@
     const errorBox = document.getElementById('errorBox');
     errorBox.style.display = 'none';
 
-    if (!apiKey || !channelUrl || !keyword) {
-      errorBox.textContent = '⚠️ APIキー、チャンネルURL、キーワードはすべて必須です。';
+    if (!channelUrl || !keyword) {
+      errorBox.textContent = '⚠️ チャンネルURLとキーワードは必須です。';
       errorBox.style.display = 'block';
       return;
     }
@@ -880,7 +732,7 @@
       const res = await fetch('/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ api_key: apiKey, channel_url: channelUrl, keyword, date_from: dateFrom, date_to: dateTo, max_videos: maxVideos })
+        body: JSON.stringify({ channel_url: channelUrl, keyword, date_from: dateFrom, date_to: dateTo, max_videos: maxVideos })
       });
 
       const data = await res.json();

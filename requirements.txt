@@ -1,4 +1,1 @@
-flask>=2.3.0
-google-api-python-client>=2.100.0
-
-gunicorn
+google-api-python-client==2.126.0
