@@ -4,45 +4,15 @@
 
 ---
 
-## 必要なもの
-
-- Python 3.8以上
-- YouTube Data API v3 のAPIキー
-
----
-
-## セットアップ手順
-
-### 1. 必要なライブラリをインストール
-
-```bash
-pip install -r requirements.txt
-```
-
-### 2. アプリを起動
-
-```bash
-python app.py
-```
-
-### 3. ブラウザでアクセス
-
-```
-http://localhost:5000
-```
-
----
-
 ## 使い方
 
-1. **APIキー** を入力（画面内にGoogleCloudからの取得手順あり）
-2. **チャンネルURL** を入力（以下の形式に対応）
+1. **チャンネルURL** を入力（以下の形式に対応）
    - `https://www.youtube.com/@channelname`
    - `https://www.youtube.com/channel/UCxxxxxxxxxx`
    - `https://www.youtube.com/c/channelname`
    - `https://www.youtube.com/user/username`
 3. **キーワード** を入力
-4. 必要に応じて **検索期間**（開始日・終了日）を設定
+4. **検索期間**（開始日・終了日）を設定
 5. **検索開始** ボタンをクリック
 
 ---
@@ -62,14 +32,3 @@ http://localhost:5000
 - コメントが無効になっている動画はスキップされます
 
 ---
-
-## ファイル構成
-
-```
-youtube_comment_search/
-├── app.py              # Flaskサーバー（APIロジック）
-├── requirements.txt    # 依存ライブラリ
-├── README.md
-└── templates/
-    └── index.html      # フロントエンドUI
-```
