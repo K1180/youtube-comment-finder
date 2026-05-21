@@ -80,8 +80,6 @@ def search_comments_in_video(youtube, video_id, keyword):
                 matched_comments.append({
                     'author':       top['authorDisplayName'],
                     'text':         text,
-                    'like_count':   top['likeCount'],
-                    'published_at': top['publishedAt'],
                 })
     except Exception:
         pass
