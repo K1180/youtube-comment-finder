@@ -60,20 +60,13 @@
     gap: 16px;
   }
 
-  .logo-mark {
-    width: 48px;
-    height: 48px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--mono);
-    font-weight: 700;
-    font-size: 18px;
-    color: white;
-    flex-shrink: 0;
-    margin-top: 4px;
+  .logo-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
+  margin-top: 4px;
   }
 
   h1 {
@@ -493,7 +486,7 @@
 <div class="container">
 
   <header>
-    <div class="logo-mark">YT</div>
+    <img src="/icon.webp" class="logo-img" alt="logo">
     <h1>
       YouTube Comment Finder
       <span>チャンネルの過去ライブ配信をコメントキーワードで検索・フィルタリング</span>
