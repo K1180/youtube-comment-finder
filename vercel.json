@@ -1,8 +1,6 @@
 {
   "version": 2,
-  "routes": [
-    { "src": "/search", "dest": "/api/search" },
-    { "src": "/(.*\\.(png|jpg|jpeg|webp|gif|svg|css|js))", "dest": "/$1" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "api/search.py" }
   ]
 }
