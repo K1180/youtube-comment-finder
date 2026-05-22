@@ -1,6 +1,8 @@
 {
   "version": 2,
   "routes": [
-    { "src": "/search", "dest": "/api/search" }
+    { "src": "/search", "dest": "/api/search" },
+    { "src": "/(.*\\.(png|jpg|jpeg|webp|gif|svg|css|js))", "dest": "/$1" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
