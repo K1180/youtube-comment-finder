@@ -1,7 +1,6 @@
 {
   "version": 2,
   "routes": [
-    { "src": "/search", "dest": "/api/search" },
-    { "src": "/(.*)",   "dest": "/index.html"  }
+    { "src": "/search", "dest": "/api/search" }
   ]
 }
