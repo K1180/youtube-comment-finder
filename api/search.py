@@ -71,7 +71,7 @@ def search_comments_in_video(youtube, video_id, keyword):
     try:
         res = youtube.commentThreads().list(
             part='snippet', videoId=video_id,
-            maxResults=100, order='relevance', textFormat='plainText'
+            maxResults=100, order='time', textFormat='plainText'
         ).execute()
         for item in res.get('items', []):
             top  = item['snippet']['topLevelComment']['snippet']
