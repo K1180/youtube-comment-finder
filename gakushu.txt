@@ -1,49 +1,48 @@
------"from **** import 0000"のように"from"が先頭に付いたimportは、****という大きな道具箱から、0000という機能だけをimportして使うイメージ(恐らく)-----
-
------pythonに元からクラス設定されている物(Webページとして動作するための設定)をimport-----
+# "from **** import 0000"のように"from"が先頭に付いたimportは、****という大きな道具箱から、0000という機能だけをimportして使うイメージ(恐らく)
+# pythonに元からクラス設定されている物(Webページとして動作するための設定)をimport
 from http.server import BaseHTTPRequestHandler
 
------"googleapiclient",googleサービス(youtube等)のAPIを使えるようにする
------"discovery",googleの、どのサービスのAPIを使用するか検索する
------"import build",'discovery'の中の'build'という関数(付属してくるため、どんな動作をするかは決まっている)をimport-----
+# "googleapiclient",googleサービス(youtube等)のAPIを使えるようにする
+# "discovery",googleの、どのサービスのAPIを使用するか検索する
+# "import build",'discovery'の中の'build'という関数(付属してくるため、どんな動作をするかは決まっている)をimport
 from googleapiclient.discovery import build
 
------pythonに元から設定されている"datetime"の中の、'datetime','timezone'をimport-----
+# pythonに元から設定されている"datetime"の中の、'datetime','timezone'をimport
 from datetime import datetime, timezone
 
------ pythonに元から設定されている...etc-----
+# pythonに元から設定されている...etc
 import json
 import re
 import os
 
------ "def"は、アロー関数のconstと似たような使い方。（正確な意味は違うらしい） "extract_channel_id"という関数名を定義？して、以下の行ではこの名前で設定した処理を行わせる
------"(api_key, url_or_id):"引数の指定。"api_key"に設定されている値が仮に"1"なら"1"を代入。-----
+# "def"は、アロー関数のconstと似たような使い方。（正確な意味は違うらしい） "extract_channel_id"という関数名を定義？して、以下の行ではこの名前で設定した処理を行わせる
+# "(api_key, url_or_id):"引数の指定。"api_key"に設定されている値が仮に"1"なら"1"を代入。
 def extract_channel_id(api_key, url_or_id):
 
------const **** みたいなノリで"youtube"を****に設定して、"youtube"と以降の行に入力した場合の処理を書いている。"build"の中には、"利用したいサービス名","apiバージョン(ほぼv3)","認証情報(誰が使うかをkey等で参照？セキュリティ度合を決める)"-----
+    # const **** みたいなノリで"youtube"を****に設定して、"youtube"と以降の行に入力した場合の処理を書いている。"build"の中には、"利用したいサービス名","apiバージョン(ほぼv3)","認証情報(誰が使うかをkey等で参照？セキュリティ度合を決める)"
     youtube = build('youtube', 'v3', developerKey=api_key)
 
------ユーザーが入力したチャンネルURLの文字列から、youtube data apiに接続するためのキーワードを抜きだす。-----
------"re.search((****),url_or_id)"で、"url_or_id"から、****(正規表現の、条件？)と一致した文字列を探す-----
------"re.search"は、"match"としてpythonで読める？オブジェクトとしてreturnされてる?(曖昧。自己解釈)ので、"re.search"の値は"match"属性が付与されている？(とりあえず、"match.group()"が使えるようになっている。)-----
+    # ユーザーが入力したチャンネルURLの文字列から、youtube data apiに接続するためのキーワードを抜きだす。
+    # "re.search((****),url_or_id)"で、"url_or_id"から、****(正規表現の、条件？)と一致した文字列を探す
+    # "re.search"は、一致した場合にMatchオブジェクトそのものを返し、一致しなければNoneを返す。返ってきたMatchオブジェクトに対して".group()"が使えるようになっている。
     handle_match     = re.search(r'@([\w\-\.]+)', url_or_id)
     channel_id_match = re.search(r'channel/(UC[\w\-]+)', url_or_id)
     custom_match     = re.search(r'(?:/c/|/user/)([\w\-\.]+)', url_or_id)
 
------"re.match(****)"で、****の条件と"url_or_id"が一致しているか検査。".strip()"は、引数(ここではユーザーが入力した文字列)の前後に空白(スペース)があった場合、空白を削除(成型)する。
+    # "re.match(****)"で、****の条件と"url_or_id"が一致しているか検査。".strip()"は、引数(ここではユーザーが入力した文字列)の前後に空白(スペース)があった場合、空白を削除(成型)する。
     direct_id_match  = re.match(r'^UC[\w\-]{22}$', url_or_id.strip())
 
------"url_or_id.strip()"が"r'^UC[\w\-]{22}$'"と一致していれば"url_or_id.strip()"を返す。
+    # "url_or_id.strip()"が"r'^UC[\w\-]{22}$'"と一致していれば"url_or_id.strip()"を返す。
     if direct_id_match:
         return url_or_id.strip()
 
------"channel_id_match.group(1)"は、"match.group()"が元からpythonに存在しており、"re.search"で"match"属性が付いた"channel_id_match"の"group(0~x(大体1))"を指定して返す意味。"group(0)"はre.search()の中身全部を指定((抜き出した対象) + (引数))、"group(1)"は、()の1個目のみ抜き出す。----
+    # "channel_id_match.group(1)"は、"match.group()"が元からpythonに存在しており、"re.search"で返ってきたMatchオブジェクトの"group(0~x(大体1))"を指定して返す意味。"group(0)"はパターン全体に一致した文字列、"group(1)"は、()の1個目のみ抜き出す。
     elif channel_id_match:
         return channel_id_match.group(1)
 
------".search().list"は"build"をimportしたことで使えるようになった「youtube data api」専用の関数。(正確には違うが、似た挙動) "part='snippet'"で「何の情報が欲しいか(part) → 動画名やチャンネル名などの基本的な情報(snippet)」、"q="で検索ワード指定。"f'@{handle}'"fをつけると、続きが'****{}'の並びをしている場合、**** + {} を出力してくれる。typeで形式を指定(チャンネル型).maxResultsは一致したチャンネルのみ表示したいので1、.execute()で実行される。
------".get"で、検索結果があった場合となかった場合の分岐を()に入れ、仮に結果がなかった場合にエラーが起きないようにしている(false=空欄)
------"items"があった場合、複数ある可能性があるので、一致率が高い1番目のデータ(配列[0])から、['snippet']の['channelId']をreturn。
+    # ".search().list"は"build"をimportしたことで使えるようになった「youtube data api」専用の関数。(正確には違うが、似た挙動) "part='snippet'"で「何の情報が欲しいか(part) → 動画名やチャンネル名などの基本的な情報(snippet)」、"q="で検索ワード指定。"f'@{handle}'"fをつけると、続きが'****{}'の並びをしている場合、**** + {} を出力してくれる。typeで形式を指定(チャンネル型).maxResultsは一致したチャンネルのみ表示したいので1、.execute()で実行される。
+    # ".get"で、検索結果があった場合となかった場合の分岐を()に入れ、仮に結果がなかった場合にエラーが起きないようにしている(false=空欄)
+    # "items"があった場合、複数ある可能性があるので、一致率が高い1番目のデータ(配列[0])から、['snippet']の['channelId']をreturn。
     elif handle_match:
         handle = handle_match.group(1)
         res = youtube.search().list(part='snippet', q=f'@{handle}', type='channel', maxResults=1).execute()
@@ -51,13 +50,13 @@ def extract_channel_id(api_key, url_or_id):
         if items:
             return items[0]['snippet']['channelId']
 
------".channels().list"username分岐の場合、チャンネルはおそらく特定できているため、そのチャンネルのデータをapiに返してもらうためのIDを".list(part='id', forUsername=username)"で検索。-----
+    # ".channels().list"username分岐の場合、チャンネルはおそらく特定できているため、そのチャンネルのデータをapiに返してもらうためのIDを".list(part='id', forUsername=username)"で検索。
     elif custom_match:
         username = custom_match.group(1)
         res = youtube.channels().list(part='id', forUsername=username).execute()
         items = res.get('items', [])
 
------idが見つかった場合、上記の"res..."と同じ処理を行い、"['snippet']['channelId']"をreturn。-----
+        # idが見つかった場合、上記の"res..."と同じ処理を行い、"['snippet']['channelId']"をreturn。
         if items:
             return items[0]['id']
         res = youtube.search().list(part='snippet', q=username, type='channel', maxResults=1).execute()
@@ -65,16 +64,16 @@ def extract_channel_id(api_key, url_or_id):
         if items:
             return items[0]['snippet']['channelId']
 
------どのifにも当てはまらなければNoneを返す。-----
+    # どのifにも当てはまらなければNoneを返す。
     return None
 
------"def"なので、ここでは"get_live_videos_from_channel"の定義のみ行い、実行はされない。
------"(youtube, channel_id)"は上記で取得できるオブジェクト。"(published_after=None, published_before=None)"は日付指定。それぞれ開始日、終了日。"(max_videos=50)"最大取得数。
+# "def"なので、ここでは"get_live_videos_from_channel"の定義のみ行い、実行はされない。
+# "(youtube, channel_id)"は上記で取得できるオブジェクト。"(published_after=None, published_before=None)"は日付指定。それぞれ開始日、終了日。"(max_videos=50)"最大取得数。
 def get_live_videos_from_channel(youtube, channel_id, published_after=None, published_before=None, max_videos=50):
 
------"videos" = []"検索結果を表示する配列の箱？を準備
------"next_page_token = None"50件ずつの動画から検索するので、50ずつを管理する栞。
------"dict()"apiに送る検索条件をまとめた辞書を作る？みたいな関数。"type"で"snippet"をさらに絞り込み、"eventType"で終了済みライブ配信(completed)を指定、"order='date'"は新しい順に取得。
+    # "videos" = []"検索結果を表示する配列の箱？を準備
+    # "next_page_token = None"50件ずつの動画から検索するので、50ずつを管理する栞。
+    # "dict()"apiに送る検索条件をまとめた辞書を作る？みたいな関数。"type"で"snippet"をさらに絞り込み、"eventType"で終了済みライブ配信(completed)を指定、"order='date'"は新しい順に取得。
     videos = []
     next_page_token = None
     params = dict(
@@ -82,22 +81,22 @@ def get_live_videos_from_channel(youtube, channel_id, published_after=None, publ
         eventType='completed', maxResults=50, order='date'
     )
 
------開始日、終了日に指定があった場合、"dict"で作った検索条件に追加する-----
+    # 開始日、終了日に指定があった場合、"dict"で作った検索条件に追加する
     if published_after:
         params['publishedAfter'] = published_after
     if published_before:
         params['publishedBefore'] = published_before
 
------もし、検索結果が"max_videos"より多い場合(今回は50)、50件毎に別の検索結果を表示する権利を与えるために"dict"の条件に"['pageToken'] = next_page_token"(ページ数)
+    # もし、検索結果が"max_videos"より多い場合(今回は50)、50件毎に別の検索結果を表示する権利を与えるために"dict"の条件に"['pageToken'] = next_page_token"(ページ数)
     while len(videos) < max_videos:
         if next_page_token:
             params['pageToken'] = next_page_token
 
------.execute()でapiに接続。"list(**params)"で、"dict()"の中身を展開し、"list(検索条件)"の形に適用。-----
+        # .execute()でapiに接続。"list(**params)"で、"dict()"の中身を展開し、"list(検索条件)"の形に適用。
         res = youtube.search().list(**params).execute()
 
------itemを取得する度に、"videos.append"(videos.0,1,2,3...のように、appendは取得順に1つずつ番号を割り当て。)をvideos[](配列)に入れる。
------"videos.0({})"には1つ目の動画タイトル等を、"videos.1({})"には2つ目の動画タイトル等を...のように、"res"で返ってきたデータを格納する。
+        # itemを取得する度に、"videos.append"でvideos[](配列)の末尾に1つずつ追加していく。
+        # "videos[0]"には1つ目の動画タイトル等を、"videos[1]"には2つ目の動画タイトル等を...のように、"res"で返ってきたデータを格納する。
         for item in res.get('items', []):
             videos.append({
                 'video_id':      item['id']['videoId'],
@@ -107,107 +106,107 @@ def get_live_videos_from_channel(youtube, channel_id, published_after=None, publ
                 'channel_title': item['snippet']['channelTitle'],
             })
 
------1ページ目の処理が終わり。50件以上検索結果があり、"max_videos"に仮に"100"を入れていた場合は上記に代入する必要がある2ページ目("nextPageToken")を"res"で貰い、whileに戻る。
------検索対象がもうない or "max_videos"に"50"を入れていた場合、if = true なので while をbreak。
+        # 1ページ目の処理が終わり。50件以上検索結果があり、"max_videos"に仮に"100"を入れていた場合は上記に代入する必要がある2ページ目("nextPageToken")を"res"で貰い、whileに戻る。
+        # 検索対象がもうない or "max_videos"に"50"を入れていた場合、if = true なので while をbreak。
         next_page_token = res.get('nextPageToken')
         if not next_page_token or len(videos) >= max_videos:
             break
 
------"[:max_videos]"で、「:(先頭から)****(****まで)」という意味になる。videosの先頭から"50"まで。------
+    # "[:max_videos]"で、「:(先頭から)****(****まで)」という意味になる。videosの先頭から"50"まで。
     return videos[:max_videos]
 
------"def"、youtubeの、50件取得した動画から、keyword。
------"comments"を格納する配列の箱を作り、ここに"keyword"と一致したコメントを格納する。
------"try:"以降に書いたコードが原因でエラーを起こした場合、処理を止めず、"except"に移動する。
+# "def"、youtubeの、50件取得した動画から、keyword。
+# "comments"を格納する配列の箱を作り、ここに"keyword"と一致したコメントを格納する。
+# "try:"以降に書いたコードが原因でエラーを起こした場合、処理を止めず、"except"に移動する。
 def search_comments_in_video(youtube, video_id, keyword):
     matched_comments = []
     try:
 
------動画1つ1つのコメント欄から、"maxResults=100"(コメントを100件まで)、order='relevance'"(関連度順)、"textFormat='plainText'"(文字列で)res。
+        # 動画1つ1つのコメント欄から、"maxResults=100"(コメントを100件まで)、order='relevance'"(関連度順)、"textFormat='plainText'"(文字列で)res。
         res = youtube.commentThreads().list(
             part='snippet', videoId=video_id,
             maxResults=100, order='relevance', textFormat='plainText'
         ).execute()
 
------"item"("res"で返ってきたもの。youtubeで定義済み。)の数だけfor
+        # "item"("res"で返ってきたもの。youtubeで定義済み。)の数だけfor
         for item in res.get('items', []):
 
------"res"のコメント100件から['topLevelComment'](親コメント。返信は除外)のみ抜き出して"top"に格納し、さらにコメント本文のみ抜き出して("top"にはまだ、コメントしたチャンネル名等の情報が含まれているため)"text"に格納。
+            # "res"のコメント100件から['topLevelComment'](親コメント。返信は除外)のみ抜き出して"top"に格納し、さらにコメント本文のみ抜き出して("top"にはまだ、コメントしたチャンネル名等の情報が含まれているため)"text"に格納。
             top  = item['snippet']['topLevelComment']['snippet']
             text = top['textDisplay']
 
------".lower"は文字列を小文字に変換。(pythonの関数) keywordが、textに存在する場合は↓
------"matched_comments.append({})"に投稿者名とコメント本文を格納。
+            # ".lower"は文字列を小文字に変換。(pythonの関数) keywordが、textに存在する場合は↓
+            # "matched_comments.append({})"に投稿者名とコメント本文を格納。
             if keyword.lower() in text.lower():
                 matched_comments.append({
                     'author':       top['authorDisplayName'],
                     'text':         text,
                 })
 
------"try"からここまででエラーが起きたら(キーワードと一致するコメントがなければ)ここまでskip
+    # "try"の中でエラー(例外)が起きたらここに移動してpassする。コメントが0件でも例外は起きないので、APIの接続失敗や存在しないキーへのアクセスなど、実行時エラーが対象。
     except Exception:
         pass
 
------キーワードと一致したコメントをreturn。-----
+    # キーワードと一致したコメントをreturn。
     return matched_comments
 
------"class"も、ほぼconstで、"handler()"というクラスを定義している。()に別のクラス名が入っていれば、そのクラスを継承して、追加で属性を与える。
+# "class"も、ほぼconstで、"handler()"というクラスを定義している。()に別のクラス名が入っていれば、そのクラスを継承して、追加で属性を与える。
 class handler(BaseHTTPRequestHandler):
 
------"def"、"do_****"はHTTPメソッド(なんかサーバー関係?)に対する処理であるという目印(慣習)。
------"OPTIONS"このサイト(URL)で何ができるの？を問い合わせる"do_****"
------"※ややこしい※"(self)"は、"BaseHTTPRequestHandler"に元から設定されている機能の1つに、「do_OPTIONSを問われた際に、問うてきた件数にそれぞれ整理番号を付与して、番号ごとに書式固定、個別の値をもつオブジェクトを作成、返答」みたいなのがあり、整理番号にあたるのが"(self)"(おそらく)
+    # "def"、"do_****"はHTTPメソッド(なんかサーバー関係?)に対する処理であるという目印(慣習)。
+    # "OPTIONS"このサイト(URL)で何ができるの？を問い合わせる"do_****"
+    # "※ややこしい※"(self)"は、"BaseHTTPRequestHandler"に元から設定されている機能の1つに、「do_OPTIONSを問われた際に、問うてきた件数にそれぞれ整理番号を付与して、番号ごとに書式固定、個別の値をもつオブジェクトを作成、返答」みたいなのがあり、整理番号にあたるのが"(self)"(おそらく)
     def do_OPTIONS(self):
 
------"do_OPTIONS(self)"に格納される値を設定している。".send_response(200)"でポジティブな結果。(404),(500)みたいな数字はここ。
------"._cors_headers()"後述
------"self.end_headers()"ここでheadersは終わり。body...etcに進む。-----
+        # "do_OPTIONS(self)"に格納される値を設定している。".send_response(200)"でポジティブな結果。(404),(500)みたいな数字はここ。
+        # "._cors_headers()"後述
+        # "self.end_headers()"ここでheadersは終わり。body...etcに進む。
         self.send_response(200)
         self._cors_headers()
         self.end_headers()
 
------"def do_"、"GET"(何かください)と問われたら、"._json_response(200, {'status': 'ok'})"(後述)を返す。
+    # "def do_"、"GET"(何かください)と問われたら、"._json_response(200, {'status': 'ok'})"(後述)を返す。
     def do_GET(self):
         self._json_response(200, {'status': 'ok'})
 
------"def do_"、"POST"(更新や登録みたいな意味？)と問われたら
------"os.environ"(import osの機能)で環境変数(既に名前が決められてて、その名前で使える固定値みたいなもの)が設定されていれば参照し、.getで取得。なければ無を取得("")。
+    # "def do_"、"POST"(更新や登録みたいな意味？)と問われたら
+    # "os.environ"(import osの機能)で環境変数(既に名前が決められてて、その名前で使える固定値みたいなもの)が設定されていれば参照し、.getで取得。なければ無を取得("")。
     def do_POST(self):
         api_key = os.environ.get('YOUTUBE_API_KEY', '')
 
------無を取得していた場合、"._json_response"(後述)
+        # 無を取得していた場合、"._json_response"(後述)
         if not api_key:
             self._json_response(500, {'error': 'サーバーにAPIキーが設定されていません。'})
             return
 
------"int"pythonに元から設定されている、"111"のような文字列として存在している数字を""を外して、数字として扱えるようにする。
------上記の"self.headers"から、"get"('Content-Length')「これから送るデータが何バイトか」を取得。なければ"0"。
------"rfile"ファイルに切り込みを入れて、開きやすくするみたいな"きっかけ"。"BaseHTTPRequestHandler"のパーツ。
------".read(length)"ファイルを読みます(数字データ分)。
+        # "int"pythonに元から設定されている、"111"のような文字列として存在している数字を""を外して、数字として扱えるようにする。
+        # 上記の"self.headers"から、"get"('Content-Length')「これから送るデータが何バイトか」を取得。なければ"0"。
+        # "rfile"ファイルに切り込みを入れて、開きやすくするみたいな"きっかけ"。"BaseHTTPRequestHandler"のパーツ。
+        # ".read(length)"ファイルを読みます(数字データ分)。
         length = int(self.headers.get('Content-Length', 0))
         body   = self.rfile.read(length)
 
------"try"、"json.loads(body)"(body)をjsonの形式になっていると仮定して、".loads"(pythonの機能)で、pythonで扱う形に適した構造に成型する。
------"except"、"._json_response"(後述)
+        # "try"、"json.loads(body)"(body)をjsonの形式になっていると仮定して、".loads"(pythonの機能)で、pythonで扱う形に適した構造に成型する。
+        # "except"、"._json_response"(後述)
         try:
             data = json.loads(body)
         except Exception:
             self._json_response(400, {'error': 'リクエストの形式が不正です。'})
             return
 
------上記で成型した"data"から、必要なデータを取り出す。".strip()"取り出した文字列前から前後の空白を消去。
+        # 上記で成型した"data"から、必要なデータを取り出す。".strip()"取り出した文字列前から前後の空白を消去。
         channel_input = (data.get('channel_url') or '').strip()
         keyword       = (data.get('keyword')     or '').strip()
         date_from     = (data.get('date_from')   or '').strip()
         date_to       = (data.get('date_to')     or '').strip()
         max_videos    = int(data.get('max_videos', 20))
 
------チャンネルURLor検索キーワードが取り出せなかった(入力がなかった)場合、._json_response
+        # チャンネルURLor検索キーワードが取り出せなかった(入力がなかった)場合、._json_response
         if not channel_input or not keyword:
             self._json_response(400, {'error': 'チャンネルURLとキーワードは必須です。'})
             return
 
------"try"、"youtube"でAPIに接続準備、"channel_id"でどのチャンネルの動画を探すかのIDを取得。見つからなければ._json_response
+        # "try"、"youtube"でAPIに接続準備、"channel_id"でどのチャンネルの動画を探すかのIDを取得。見つからなければ._json_response
         try:
             youtube    = build('youtube', 'v3', developerKey=api_key)
             channel_id = extract_channel_id(api_key, channel_input)
@@ -215,26 +214,26 @@ class handler(BaseHTTPRequestHandler):
                 self._json_response(404, {'error': 'チャンネルが見つかりませんでした。'})
                 return
 
------youtubeapiの機能で、時間指定等で使える変数名。初期化のためNone
+            # youtubeapiの機能で、時間指定等で使える変数名。初期化のためNone
             published_after  = None
             published_before = None
 
------もしdate_fromにデータがあれば(日付指定欄に入力があれば)"datetime"(pythonの機能)で"date_from"をYYYY-MM-DDに変換。".replace(tzinfo=timezone.utc)"「UTCですよ」とタグ付け。"isoformat()"誰でも日付として読める書式に変換。検索開始日用の箱に格納。
+            # もしdate_fromにデータがあれば(日付指定欄に入力があれば)"datetime"(pythonの機能)で"date_from"をYYYY-MM-DDに変換。".replace(tzinfo=timezone.utc)"「UTCですよ」とタグ付け。"isoformat()"誰でも日付として読める書式に変換。検索開始日用の箱に格納。
             if date_from:
                 published_after = datetime.strptime(date_from, '%Y-%m-%d').replace(tzinfo=timezone.utc).isoformat()
 
------日付指定の終了日時刻をutc23時59分59秒までに設定。検索終了日の箱に格納。
+            # 日付指定の終了日時刻をutc23時59分59秒までに設定。検索終了日の箱に格納。
             if date_to:
                 dt = datetime.strptime(date_to, '%Y-%m-%d').replace(
                     hour=23, minute=59, second=59, tzinfo=timezone.utc)
                 published_before = dt.isoformat()
 
------ユーザーが入力した内容から実際に検索し、下記の条件に一致したものはtrue側に、合わないものはfalse側に。
+            # ユーザーが入力した内容から実際に検索し、下記の条件に一致したものはtrue側に、合わないものはfalse側に。
             videos      = get_live_videos_from_channel(youtube, channel_id, published_after, published_before, max_videos)
             matched     = []
             not_matched = []
 
------videoの数だけ、"comments"に実際のコメントを格納。if、1以上格納されている場合、そのコメント内容を['matched_comments']に、その動画で何件キーワードが一致しているかを"count"に格納し、appendで名札付けしてtrue側に格納。
+            # videoの数だけ、"comments"に実際のコメントを格納。if、1以上格納されている場合、そのコメント内容を['matched_comments']に、その動画で何件キーワードが一致しているかを"count"に格納し、appendで名札付けしてtrue側に格納。
             for v in videos:
                 comments = search_comments_in_video(youtube, v['video_id'], keyword)
                 if comments:
@@ -244,7 +243,7 @@ class handler(BaseHTTPRequestHandler):
                 else:
                     not_matched.append(v)
 
------responseをjsonで行う。200(成功したよ),{}(キーワード検索の結果)
+            # responseをjsonで行う。200(成功したよ),{}(キーワード検索の結果)
             self._json_response(200, {
                 'matched':      matched,
                 'not_matched':  not_matched,
@@ -252,32 +251,32 @@ class handler(BaseHTTPRequestHandler):
                 'keyword':      keyword,
             })
 
------上の処理でどこかエラーが起きたらここに移動。500を返す。
+        # 上の処理でどこかエラーが起きたらここに移動。500を返す。
         except Exception as e:
             self._json_response(500, {'error': f'エラーが発生しました: {str(e)}'})
 
------cors(API利用等で第三者のURLを踏んでデータを取ってくるのは危ない！原則禁止！のルール)を書き換えてる。
------Origin','*'URL全部ok!(*)
------Methods', 'POST, GET, OPTIONS'のみ使用可。
------'Content-Type':****でデータ形式(.jsonや.text)を伝えられるようになる。
+    # cors(API利用等で第三者のURLを踏んでデータを取ってくるのは危ない！原則禁止！のルール)を書き換えてる。
+    # Origin','*'URL全部ok!(*)
+    # Methods', 'POST, GET, OPTIONS'のみ使用可。
+    # 'Content-Type':****でデータ形式(.jsonや.text)を伝えられるようになる。
     def _cors_headers(self):
         self.send_header('Access-Control-Allow-Origin',  '*')
         self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
 
------def "self"毎の"status, payload"(404とかの数字、返すデータ)
+    # def "self"毎の"status, payload"(404とかの数字、返すデータ)
     def _json_response(self, status, payload):
 
------".dumps"pythonでつかうdictの並びを.json型に変更。"ensure_ascii=False"日本語がwebだと初期設定?でUnicodeになっている(画像として文字を認識している?)ので、文字列で扱えるように成型。
------".encode('utf-8')"文字列のままではwebでデータの送りあいができない?ので、できるような形に変換。
+        # ".dumps"pythonでつかうdictの並びを.json型に変更。"ensure_ascii=False"日本語がwebだと初期設定?でUnicodeになっている(画像として文字を認識している?)ので、文字列で扱えるように成型。
+        # ".encode('utf-8')"文字列のままではwebでデータの送りあいができない?ので、できるような形に変換。
         body = json.dumps(payload, ensure_ascii=False).encode('utf-8')
 
------404等を返信、URLなんでも通信ok、ファイル形式はjson、.encodeしたデータがどのぐらいの大きさか通知、ここまで!
+        # 404等を返信、URLなんでも通信ok、ファイル形式はjson、.encodeしたデータがどのぐらいの大きさか通知、ここまで!
         self.send_response(status)
         self._cors_headers()
         self.send_header('Content-Type',   'application/json; charset=utf-8')
         self.send_header('Content-Length', str(len(body)))
         self.end_headers()
 
------complete...
+        # 結果を返す
         self.wfile.write(body)
