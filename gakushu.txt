@@ -122,7 +122,7 @@ def search_comments_in_video(youtube, video_id, keyword):
     matched_comments = []
     try:
 
-        # 動画1つ1つのコメント欄から、"maxResults=100"(コメントを100件まで)、order='relevance'"(関連度順)、"textFormat='plainText'"(文字列で)res。
+        # 動画1つ1つのコメント欄から、"maxResults=100"(コメントを100件まで)、order='time'"(新しい順)、"textFormat='plainText'"(文字列で)res。
         res = youtube.commentThreads().list(
             part='snippet', videoId=video_id,
             maxResults=100, order='relevance', textFormat='plainText'
